@@ -20,9 +20,23 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState(todayStr());
   const [expandedRoom, setExpandedRoom] = useState(null);
   const [takenSlots, setTakenSlots] = useState([]);
+  const [bookedCounts, setBookedCounts] = useState({});
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+
+  const loadBookedCounts = useCallback(async (date) => {
+    const { data } = await supabase
+      .from('bookings')
+      .select('room_id')
+      .eq('booking_date', date);
+
+    const counts = {};
+    (data || []).forEach((b) => {
+      counts[b.room_id] = (counts[b.room_id] || 0) + 1;
+    });
+    setBookedCounts(counts);
+  }, []);
 
   useEffect(() => {
     async function init() {
@@ -35,10 +49,11 @@ export default function DashboardPage() {
 
       const { data: roomsData } = await supabase.from('rooms').select('*').order('name');
       setRooms(roomsData || []);
+      await loadBookedCounts(todayStr());
       setLoading(false);
     }
     init();
-  }, [router]);
+  }, [router, loadBookedCounts]);
 
   const loadTakenSlots = useCallback(async (roomId, date) => {
     const { data } = await supabase
@@ -61,6 +76,7 @@ export default function DashboardPage() {
 
   async function handleDateChange(date) {
     setSelectedDate(date);
+    await loadBookedCounts(date);
     if (expandedRoom) {
       await loadTakenSlots(expandedRoom, date);
     }
@@ -92,6 +108,7 @@ export default function DashboardPage() {
 
     setMessage({ type: 'success', text: `Booked ${slot} on ${selectedDate}!` });
     await loadTakenSlots(roomId, selectedDate);
+    await loadBookedCounts(selectedDate);
   }
 
   if (loading) return <div className="container">Loading...</div>;
@@ -100,7 +117,10 @@ export default function DashboardPage() {
     <div>
       <Navbar />
       <div className="container">
-        <h2>Book a study room</h2>
+        <div className="page-heading">
+          <h2>Find your nook</h2>
+          <p>Pick a date, see what's open, and book in one click.</p>
+        </div>
 
         <div className="card">
           <label>Date</label>
@@ -122,8 +142,13 @@ export default function DashboardPage() {
           <div className="card" key={room.id}>
             <div className="room-header">
               <div>
-                <strong>{room.name}</strong>{' '}
-                <span className="badge">{room.capacity} seats</span>
+                <strong>{room.name}</strong>
+                <div>
+                  <span className="badge">{room.capacity} seats</span>
+                  <span className="badge amber">
+                    {bookedCounts[room.id] || 0} / {SLOTS.length} slots booked
+                  </span>
+                </div>
               </div>
               <button className="secondary" onClick={() => handleExpandRoom(room.id)}>
                 {expandedRoom === room.id ? 'Hide slots' : 'View slots'}

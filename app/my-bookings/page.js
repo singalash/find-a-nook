@@ -51,10 +51,15 @@ export default function MyBookingsPage() {
     <div>
       <Navbar />
       <div className="container">
-        <h2>My bookings</h2>
+        <div className="page-heading">
+          <h2>My bookings</h2>
+          <p>Everything you've reserved, in one place.</p>
+        </div>
         {message && <p className="success-text">{message}</p>}
 
-        {bookings.length === 0 && <p>You have no bookings yet.</p>}
+        {bookings.length === 0 && (
+          <p className="empty-state">You haven't booked a room yet — head to the dashboard to find one.</p>
+        )}
 
         {bookings.map((b) => (
           <div className="card room-header" key={b.id}>
