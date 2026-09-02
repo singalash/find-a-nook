@@ -45,3 +45,4 @@ Deployed on Vercel, connected to this GitHub repo. Environment variables (`NEXT_
 (Add a test account here after deployment, e.g.)
 - Email: test@example.com
 - Password: test1234
+ 
