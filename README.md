@@ -42,6 +42,5 @@ Two tables in Supabase:
 Deployed on Vercel, connected to this GitHub repo. Environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are set in the Vercel project settings.
 
 ## Test credentials
-(Add a test account here after deployment, e.g.)
-- Email: test@example.com
-- Password: test1234
+- Email: testaccount@test.com
+- Password: 123456
